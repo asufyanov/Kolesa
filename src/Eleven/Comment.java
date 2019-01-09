@@ -9,12 +9,29 @@ import java.util.Map;
 
 
 public class Comment implements CommentDataFactory{
+	/*
+	 * Сделал такое решение, где каждый начальный комент - это дерево
+	 * Поэтому у каждого комментария есть список подКоментов
+	 * 
+	 * Сделал решение, где коментарии могут быть данны в разброс
+	 * Не только по порядку
+	 * 
+	 * В Main Класс сделал рекурсивный вывод с отступами,
+	 * Запустите для наглядности
+	 * 
+	 * Если родительский коментарий не является корневым,
+	 * то ищу его тоже рекурсивно
+	 * 
+	 * 
+	 */
 	
 	private long id;
 	private long userId;
 	private long replyTo;
 	private String name;
 	private String content;
+
+
 	private List<Comment> childComments;
 	
 	public Comment(){
@@ -76,10 +93,42 @@ public class Comment implements CommentDataFactory{
 				
 			else if (map.containsKey(tempComment.getReplyTo()))
 				map.get(tempComment.getReplyTo()).childComments.add(tempComment);
+			
+			else {
+				Comment parent = null;
+
+				for (Map.Entry entry : map.entrySet()) {
+					Comment comment = (Comment)entry.getValue();
+					
+				    parent = recurFind(comment, tempComment.getReplyTo());
+				    if (parent!=null) break;
+				}
+				if (parent!=null) parent.getChildComments().add(tempComment);
+			}
 				
 		}
 		
 		return map;
+	}
+	
+	private Comment recurFind(Comment c, Long id){
+		Comment comment = null;
+		List<Comment> t_comments = c.getChildComments();
+		for (int i=0; i<t_comments.size(); i++){
+			if (t_comments.get(i).getId()==id) return t_comments.get(i);
+			comment = recurFind(t_comments.get(i), id);
+			if (comment!=null) return comment;
+		}
+		
+		return null;
+	}
+	
+	public List<Comment> getChildComments() {
+		return childComments;
+	}
+
+	public void setChildComments(List<Comment> childComments) {
+		this.childComments = childComments;
 	}
 
   
